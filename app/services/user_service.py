@@ -21,7 +21,7 @@ async def upsert_user(telegram_id: int, name: Optional[str] = None, phone: Optio
         await db.close()
 
 
-async def get_user(telegram_id: int) -> dict | None:
+async def get_user(telegram_id: int) -> Optional[dict]:
     """Get user by telegram_id."""
     db = await get_db()
     try:
@@ -60,7 +60,7 @@ async def set_role(telegram_id: int, role: str):
     await update_user(telegram_id, role=role)
 
 
-async def get_user_by_id(user_id: int) -> dict | None:
+async def get_user_by_id(user_id: int) -> Optional[dict]:
     """Get user by internal id."""
     db = await get_db()
     try:
@@ -95,7 +95,7 @@ async def get_user_counts() -> dict:
         await db.close()
 
 
-async def get_all_users_by_role(role: str | None = None) -> list:
+async def get_all_users_by_role(role: Optional[str] = None) -> list:
     """Get all users, optionally filtered by role."""
     db = await get_db()
     try:
