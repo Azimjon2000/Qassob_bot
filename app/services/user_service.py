@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 from app.db.session import get_db
 
 
@@ -121,7 +121,7 @@ async def is_registered(telegram_id: int) -> bool:
     return bool(user.get("name") and user.get("phone"))
 
 
-async def assign_reg_no(telegram_id: int) -> tuple[int, bool]:
+async def assign_reg_no(telegram_id: int) -> Tuple[int, bool]:
     """
     Assign registration number to user if not exists.
     Returns (reg_no, is_newly_assigned).
