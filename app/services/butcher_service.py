@@ -1,4 +1,4 @@
-"""Butcher service for database operations."""
+from typing import Optional, List, Dict
 from app.db.session import get_db
 from app.services.geo_service import haversine, bounding_box
 
@@ -50,7 +50,7 @@ async def update_butcher(butcher_id: int, **kwargs):
         await db.close()
 
 
-async def get_butcher_by_user(user_id: int) -> dict | None:
+async def get_butcher_by_user(user_id: int) -> Optional[dict]:
     """Get butcher by user_id."""
     db = await get_db()
     try:
@@ -66,7 +66,7 @@ async def get_butcher_by_user(user_id: int) -> dict | None:
         await db.close()
 
 
-async def get_butcher_detail(butcher_id: int) -> dict | None:
+async def get_butcher_detail(butcher_id: int) -> Optional[dict]:
     """Get full butcher info."""
     db = await get_db()
     try:

@@ -1,9 +1,9 @@
-"""User service for database operations."""
+from typing import Optional, Union
 from app.db.session import get_db
 
 
-async def upsert_user(telegram_id: int, name: str | None = None, phone: str | None = None,
-                      lat: float | None = None, lon: float | None = None):
+async def upsert_user(telegram_id: int, name: Optional[str] = None, phone: Optional[str] = None,
+                      lat: Optional[float] = None, lon: Optional[float] = None):
     """Insert or update user in database."""
     db = await get_db()
     try:

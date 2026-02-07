@@ -1,4 +1,4 @@
-"""Region and district service."""
+from typing import Optional
 from app.db.session import get_db
 
 
@@ -27,7 +27,7 @@ async def list_districts(region_id: int) -> list:
         await db.close()
 
 
-async def get_region(region_id: int) -> dict | None:
+async def get_region(region_id: int) -> Optional[dict]:
     """Get region by id."""
     db = await get_db()
     try:
@@ -43,7 +43,7 @@ async def get_region(region_id: int) -> dict | None:
         await db.close()
 
 
-async def get_district(district_id: int) -> dict | None:
+async def get_district(district_id: int) -> Optional[dict]:
     """Get district by id."""
     db = await get_db()
     try:
