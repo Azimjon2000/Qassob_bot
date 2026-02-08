@@ -13,7 +13,7 @@ from app.keyboards.reply import (
     request_contact_kb, request_location_kb, settings_kb, butcher_settings_kb,
     role_picker_kb, back_kb
 )
-from app.config import ADMINS
+from app.config import ADMINS, add_admin
 from app.utils.i18n import t
 
 router = Router()
@@ -33,22 +33,6 @@ async def cmd_start(message: Message, state: FSMContext):
     """Handle /start command."""
     telegram_id = message.from_user.id
     
-    # ADMIN BYPASS
-    if telegram_id in ADMINS:
-        user = await get_user(telegram_id)
-        if not user:
-            await upsert_user(telegram_id=telegram_id, name=message.from_user.full_name)
-            await set_role(telegram_id, "admin")
-        elif user.get("role") != "admin":
-            await set_role(telegram_id, "admin")
-            
-        await message.answer(
-            f"👑 Xush kelibsiz, Admin {message.from_user.first_name}!", 
-            reply_markup=admin_main_kb()
-        )
-        await state.clear()
-        return
-    
     # Check user
     user = await get_user(telegram_id)
     
@@ -58,6 +42,25 @@ async def cmd_start(message: Message, state: FSMContext):
         user = {"role": "pending", "name": message.from_user.full_name}
     
     role = user.get("role", "pending")
+    
+    # ADMIN CHECK - both from config and database
+    is_admin = telegram_id in ADMINS or role == "admin"
+    
+    if is_admin:
+        # Ensure role is set to admin in database
+        if role != "admin":
+            await set_role(telegram_id, "admin")
+        
+        # Ensure in ADMINS list
+        if telegram_id not in ADMINS:
+            add_admin(telegram_id)
+        
+        await message.answer(
+            f"👑 Xush kelibsiz, Admin {message.from_user.first_name}!", 
+            reply_markup=admin_main_kb()
+        )
+        await state.clear()
+        return
     
     # IF ROLE IS PENDING -> SHOW PICKER
     if role == "pending" or not role:
@@ -70,12 +73,6 @@ async def cmd_start(message: Message, state: FSMContext):
         return
 
     # IF ROLE EXISTS -> CHECK REGISTRATION OR SHOW MENU
-    
-    # Admin always passes
-    if telegram_id in ADMINS:
-        await message.answer("Xush kelibsiz, Admin!", reply_markup=admin_main_kb())
-        await state.clear()
-        return
 
     if role == "client":
         if user.get("name") and user.get("phone"):

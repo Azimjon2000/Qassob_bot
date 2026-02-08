@@ -207,11 +207,33 @@ async def toggle_closed(butcher_id: int) -> bool:
 
 
 async def delete_butcher(butcher_id: int):
-    """Delete butcher."""
+    """Delete butcher and reset user role to pending."""
     db = await get_db()
     try:
+        # 1. Get user_id before deleting
+        cursor = await db.execute(
+            "SELECT user_id FROM butchers WHERE id = ?", 
+            (butcher_id,)
+        )
+        row = await cursor.fetchone()
+        
+        if not row:
+            return  # Butcher not found
+        
+        user_id = row[0]
+        
+        # 2. Delete prices
         await db.execute("DELETE FROM prices WHERE butcher_id = ?", (butcher_id,))
+        
+        # 3. Delete butcher
         await db.execute("DELETE FROM butchers WHERE id = ?", (butcher_id,))
+        
+        # 4. Reset user role to 'pending' so they can re-register
+        await db.execute(
+            "UPDATE users SET role = 'pending' WHERE id = ?", 
+            (user_id,)
+        )
+        
         await db.commit()
     finally:
         await db.close()

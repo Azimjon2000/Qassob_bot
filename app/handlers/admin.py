@@ -2,13 +2,14 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.fsm.context import FSMContext
-from app.config import ADMINS
+from app.config import ADMINS, add_admin
 
-from app.states import AdminBroadcast, AdminSupport, AdminAddAdmin, AdminButcherMessage
-from app.services.user_service import get_user_counts, get_user_by_id, get_user, upsert_user, set_role
+from app.states import AdminBroadcast, AdminSupport, AdminAddAdmin, AdminButcherMessage, AdminDeleteUser
+from app.services.user_service import get_user_counts, get_user_by_id, get_user, upsert_user, set_role, delete_user_completely
 from app.services.butcher_service import (
     get_butcher_counts, get_pending_butchers, get_butcher_detail,
-    approve_butcher, block_butcher, unblock_butcher, toggle_closed, delete_butcher, get_all_butchers_paginated
+    approve_butcher, block_butcher, unblock_butcher, toggle_closed, delete_butcher, get_all_butchers_paginated,
+    get_butcher_by_user
 )
 from app.services.broadcast_service import send_broadcast
 from app.services.donate_service import (
@@ -621,14 +622,140 @@ async def process_add_admin(message: Message, state: FSMContext):
     user = await get_user(new_admin_id)
     if not user:
         await upsert_user(new_admin_id)
+        user = await get_user(new_admin_id)
+    
+    # If user is a butcher, delete butcher profile
+    if user:
+        butcher = await get_butcher_by_user(user['id'])
+        if butcher:
+            await delete_butcher(butcher['id'])
     
     # Set role to admin
     await set_role(new_admin_id, "admin")
     
+    # Add to runtime ADMINS list
+    add_admin(new_admin_id)
+    
     await message.answer(
         f"✅ Yangi admin qo'shildi!\n\n"
-        f"Telegram ID: {new_admin_id}",
+        f"Telegram ID: {new_admin_id}\n\n"
+        f"Foydalanuvchi endi /start ni bosganda admin panel ko'rinadi.",
         reply_markup=admin_main_kb()
     )
     await state.clear()
+
+
+# ==================== DELETE USER ====================
+
+@router.message(F.text == "🗑 Foydalanuvchini o'chirish", F.from_user.id.in_(ADMINS))
+async def cmd_delete_user(message: Message, state: FSMContext):
+    """Start delete user flow."""
+    await message.answer(
+        "⚠️ <b>Foydalanuvchini o'chirish</b>\n\n"
+        "Foydalanuvchi Telegram ID sini kiriting:\n\n"
+        "ID ni topish uchun @userinfobot ga /start yuboring.\n\n"
+        "<i>Ogohlantirish: Bu amal foydalanuvchining barcha ma'lumotlarini "
+        "database'dan o'chiradi (profil, qassobxona, narxlar).</i>",
+        reply_markup=back_kb(),
+        parse_mode="HTML"
+    )
+    await state.set_state(AdminDeleteUser.waiting_telegram_id)
+
+
+@router.message(AdminDeleteUser.waiting_telegram_id, F.from_user.id.in_(ADMINS))
+async def process_delete_user(message: Message, state: FSMContext):
+    """Process delete user by telegram ID."""
+    if message.text == "⬅️ Orqaga":
+        await state.clear()
+        await message.answer("Bekor qilindi", reply_markup=admin_main_kb())
+        return
+    
+    if message.text == "✅ Ha, o'chirish":
+        # Handle confirmation
+        await confirm_delete_user(message, state)
+        return
+    
+    if message.text == "❌ Yo'q, bekor qilish":
+        # Handle cancellation
+        await cancel_delete_user(message, state)
+        return
+    
+    text = message.text.strip()
+    if not text.isdigit():
+        await message.answer("❌ Iltimos, faqat raqam kiriting:")
+        return
+    
+    telegram_id = int(text)
+    
+    # Check if user exists
+    user = await get_user(telegram_id)
+    if not user:
+        await message.answer(
+            f"❌ Telegram ID {telegram_id} bilan foydalanuvchi topilmadi.",
+            reply_markup=admin_main_kb()
+        )
+        await state.clear()
+        return
+    
+    # Show user info and ask for confirmation
+    user_info = (
+        f"👤 <b>Foydalanuvchi ma'lumotlari:</b>\n\n"
+        f"🆔 Telegram ID: <code>{telegram_id}</code>\n"
+        f"👤 Ism: {user.get('name') or 'Kiritilmagan'}\n"
+        f"📞 Telefon: {user.get('phone') or 'Kiritilmagan'}\n"
+        f"🎭 Rol: {user.get('role', 'pending')}\n\n"
+        f"⚠️ Ushbu foydalanuvchini o'chirishni tasdiqlaysizmi?\n\n"
+        f"<i>Bu amal qaytarib bo'lmaydi!</i>"
+    )
+    
+    # Store telegram_id for confirmation
+    await state.update_data(delete_user_telegram_id=telegram_id)
+    
+    # Create confirmation keyboard
+    confirm_kb_markup = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="✅ Ha, o'chirish")],
+            [KeyboardButton(text="❌ Yo'q, bekor qilish")]
+        ],
+        resize_keyboard=True
+    )
+    
+    await message.answer(user_info, reply_markup=confirm_kb_markup, parse_mode="HTML")
+
+
+async def confirm_delete_user(message: Message, state: FSMContext):
+    """Confirm and delete user."""
+    data = await state.get_data()
+    telegram_id = data.get("delete_user_telegram_id")
+    
+    if not telegram_id:
+        await message.answer("❌ Xatolik yuz berdi", reply_markup=admin_main_kb())
+        await state.clear()
+        return
+    
+    # Delete user
+    success = await delete_user_completely(telegram_id)
+    
+    if success:
+        await message.answer(
+            f"✅ Foydalanuvchi o'chirildi!\n\n"
+            f"🆔 Telegram ID: <code>{telegram_id}</code>\n\n"
+            f"Foydalanuvchi endi /start ni bosganda qaytadan "
+            f"rol tanlashi va ro'yxatdan o'tishi mumkin.",
+            reply_markup=admin_main_kb(),
+            parse_mode="HTML"
+        )
+    else:
+        await message.answer(
+            f"❌ Foydalanuvchi o'chirishda xatolik yuz berdi.",
+            reply_markup=admin_main_kb()
+        )
+    
+    await state.clear()
+
+
+async def cancel_delete_user(message: Message, state: FSMContext):
+    """Cancel delete user."""
+    await state.clear()
+    await message.answer("Bekor qilindi", reply_markup=admin_main_kb())
 

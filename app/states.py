@@ -78,3 +78,9 @@ class AdminAddAdmin(StatesGroup):
 class AdminButcherMessage(StatesGroup):
     """Admin send message to butcher flow."""
     waiting_message = State()
+
+
+class AdminDeleteUser(StatesGroup):
+    """Admin delete user by telegram ID flow."""
+    waiting_telegram_id = State()
+

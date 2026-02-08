@@ -57,7 +57,7 @@ def admin_main_kb() -> ReplyKeyboardMarkup:
             [KeyboardButton(text="📊 Statistika"), KeyboardButton(text="🏪 Qassobxonalar")],
             [KeyboardButton(text="📢 Xabar yuborish")],
             [KeyboardButton(text="🛠 Qo'llab-quvvatlash"), KeyboardButton(text="💳 Donat sozlamalari")],
-            [KeyboardButton(text="➕ Admin qo'shish")],
+            [KeyboardButton(text="➕ Admin qo'shish"), KeyboardButton(text="🗑 Foydalanuvchini o'chirish")],
             [KeyboardButton(text="⚙️ Sozlamalar")]
         ],
         resize_keyboard=True

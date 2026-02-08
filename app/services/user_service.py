@@ -148,3 +148,46 @@ async def assign_reg_no(telegram_id: int) -> Tuple[int, bool]:
         return new_reg, True
     finally:
         await db.close()
+
+
+async def delete_user_completely(telegram_id: int) -> bool:
+    """
+    Delete user and all related data from database.
+    Returns True if user was found and deleted, False otherwise.
+    """
+    db = await get_db()
+    try:
+        # 1. Get user by telegram_id
+        cursor = await db.execute(
+            "SELECT id FROM users WHERE telegram_id = ?",
+            (telegram_id,)
+        )
+        row = await cursor.fetchone()
+        
+        if not row:
+            return False  # User not found
+        
+        user_id = row[0]
+        
+        # 2. Check if user is a butcher and delete related data
+        cursor = await db.execute(
+            "SELECT id FROM butchers WHERE user_id = ?",
+            (user_id,)
+        )
+        butcher_row = await cursor.fetchone()
+        
+        if butcher_row:
+            butcher_id = butcher_row[0]
+            # Delete prices
+            await db.execute("DELETE FROM prices WHERE butcher_id = ?", (butcher_id,))
+            # Delete butcher
+            await db.execute("DELETE FROM butchers WHERE id = ?", (butcher_id,))
+        
+        # 3. Delete user
+        await db.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        
+        await db.commit()
+        return True
+    finally:
+        await db.close()
+
