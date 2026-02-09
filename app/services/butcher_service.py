@@ -11,8 +11,9 @@ async def create_butcher(user_id: int, data: dict) -> int:
         INSERT INTO butchers (
             user_id, shop_name, owner_name, phone,
             region_id, district_id, lat, lon,
-            address_text, work_time, image_file_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            address_text, work_time, image_file_id,
+            extra_info, video_file_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             user_id,
             data.get("shop_name"),
@@ -24,7 +25,9 @@ async def create_butcher(user_id: int, data: dict) -> int:
             data.get("lon"),
             data.get("address_text"),
             data.get("work_time"),
-            data.get("image_file_id")
+            data.get("image_file_id"),
+            data.get("extra_info"),
+            data.get("video_file_id")
         ))
         await db.commit()
         return cursor.lastrowid

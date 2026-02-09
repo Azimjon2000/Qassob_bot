@@ -72,6 +72,7 @@ def butcher_detail_kb(butcher_id: int, lang: str = "uz") -> InlineKeyboardMarkup
     
     builder.button(text="📍 Lokatsiyani ko'rish", callback_data=f"butcher_loc:{butcher_id}")
     builder.button(text="🐄 So'yib olish narxlari", callback_data=f"butcher_buy:{butcher_id}")
+    builder.button(text="🎥 Mahsulotlar videosi", callback_data=f"butcher_video:{butcher_id}")
     builder.button(text="⬅️ Orqaga", callback_data="back_to_list")
     builder.adjust(1)
     return builder.as_markup()

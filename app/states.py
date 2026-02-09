@@ -43,6 +43,8 @@ class ButcherUpdate(StatesGroup):
     updating_prices_sell = State()
     updating_prices_buy = State()
     updating_work_time = State()
+    updating_extra_info = State()
+    updating_video = State()
     uploading_image = State()
     price_category = State()
     price_value = State()

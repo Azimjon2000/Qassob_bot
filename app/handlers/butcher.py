@@ -1,4 +1,5 @@
 """Butcher handlers - registration and profile management."""
+import html
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
@@ -545,3 +546,99 @@ async def cmd_donate(message: Message):
     """Show donate info."""
     text = await get_donate_message()
     await message.answer(text, parse_mode="HTML")
+
+
+# ==================== NEW FEATURES V9 ====================
+
+@router.message(F.text == "👥 Foydalanuvchilar soni")
+async def show_user_count(message: Message):
+    """Show total user count."""
+    from app.services.user_service import get_all_users_count
+    count = await get_all_users_count()
+    await message.answer(f"👥 Botdagi foydalanuvchilar soni: {count} ta")
+
+
+@router.message(F.text == "📝 Qo‘shimcha ma’lumot yozish")
+async def update_extra_info_start(message: Message, state: FSMContext):
+    """Start extra info update."""
+    await message.answer(
+        "Qo‘shimcha ma’lumot yozing qassobxonadagi mahsulotlariz haqida, "
+        "masalan to'ylar va marosimlar uchun kattaroq abyomda go'sht olganlarga "
+        "chegirma qilib kelishtirib beriladi (matn va raqam bo‘lishi mumkin):\n\n"
+        "Matn uzunligi: maksimal 300 ta belgi.",
+        reply_markup=back_kb()
+    )
+    await state.set_state(ButcherUpdate.updating_extra_info)
+
+
+@router.message(ButcherUpdate.updating_extra_info)
+async def process_extra_info(message: Message, state: FSMContext):
+    """Process extra info text."""
+    if message.text == "⬅️ Orqaga":
+        await state.clear()
+        await message.answer("🏠 Asosiy menyu", reply_markup=butcher_main_kb())
+        return
+
+    text = message.text.strip()
+    
+    if len(text) > 300:
+        await message.answer(f"❌ Matn juda uzun ({len(text)} ta belgi). Iltimos, 300 tadan oshmasin.")
+        return
+
+    # Sanitize
+    safe_text = html.escape(text)
+
+    telegram_id = message.from_user.id
+    user = await get_user(telegram_id)
+    if user:
+        butcher = await get_butcher_by_user(user["id"])
+        if butcher:
+            await update_butcher(butcher["id"], extra_info=safe_text)
+            await message.answer(
+                "✅ Qo'shimcha ma'lumot saqlandi!",
+                reply_markup=butcher_main_kb()
+            )
+    
+    await state.clear()
+
+
+@router.message(F.text == "🎥 Mahsulotlar videosi")
+async def update_video_start(message: Message, state: FSMContext):
+    """Start video update."""
+    await message.answer(
+        "Mahsulotlar videosini yuboring, klentlarga qo'shimcha malumot uchun ko'rsatiladi. "
+        "Bu videoni tez tez yangilab turishiz mumkin (faqat 1 ta video):",
+        reply_markup=back_kb()
+    )
+    await state.set_state(ButcherUpdate.updating_video)
+
+
+@router.message(ButcherUpdate.updating_video, F.video)
+async def process_video_upload(message: Message, state: FSMContext):
+    """Process video upload."""
+    video = message.video
+    file_id = video.file_id
+    
+    telegram_id = message.from_user.id
+    user = await get_user(telegram_id)
+    if user:
+        butcher = await get_butcher_by_user(user["id"])
+        if butcher:
+            await update_butcher(butcher["id"], video_file_id=file_id)
+            await message.answer(
+                "✅ Video saqlandi! Eski video o'chirildi (agar bo'lsa).",
+                reply_markup=butcher_main_kb()
+            )
+    
+    await state.clear()
+
+
+@router.message(ButcherUpdate.updating_video)
+async def process_video_invalid(message: Message, state: FSMContext):
+    """Handle invalid video input."""
+    if message.text == "⬅️ Orqaga":
+        await state.clear()
+        await message.answer("🏠 Asosiy menyu", reply_markup=butcher_main_kb())
+        return
+
+    await message.answer("❌ Iltimos, video fayl yuboring.")

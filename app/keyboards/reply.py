@@ -19,7 +19,7 @@ def client_main_kb() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="📍 Yaqin qassobxonalar")],
-            [KeyboardButton(text="🥩 Go'sht narxlari")],
+            [KeyboardButton(text="🥩 Go'sht narxlari"), KeyboardButton(text="👥 Foydalanuvchilar soni")],
             [KeyboardButton(text="ℹ️ Bot haqida"), KeyboardButton(text="⚙️ Sozlamalar")]
         ],
         resize_keyboard=True
@@ -32,8 +32,10 @@ def butcher_main_kb(lang: str = "uz") -> ReplyKeyboardMarkup:
         keyboard=[
             [KeyboardButton(text="📌 Lokatsiyani yangilash")],
             [KeyboardButton(text="📞 Kontaktni yangilash"), KeyboardButton(text="🕒 Ish vaqti")],
+            [KeyboardButton(text="📝 Qo‘shimcha ma’lumot yozish"), KeyboardButton(text="🎥 Mahsulotlar videosi")],
             [KeyboardButton(text="💰 Sotish narxlari"), KeyboardButton(text="🐄 Sotib olish narxlari")],
-            [KeyboardButton(text="⚙️ Sozlamalar"), KeyboardButton(text="💳 Donat")]
+            [KeyboardButton(text="⚙️ Sozlamalar"), KeyboardButton(text="💳 Donat")],
+            [KeyboardButton(text="👥 Foydalanuvchilar soni")]
         ],
         resize_keyboard=True
     )

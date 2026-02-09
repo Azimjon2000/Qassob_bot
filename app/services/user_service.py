@@ -191,3 +191,13 @@ async def delete_user_completely(telegram_id: int) -> bool:
     finally:
         await db.close()
 
+
+async def get_all_users_count() -> int:
+    """Get total number of users."""
+    db = await get_db()
+    try:
+        cursor = await db.execute("SELECT COUNT(*) FROM users")
+        result = await cursor.fetchone()
+        return result[0] if result else 0
+    finally:
+        await db.close()

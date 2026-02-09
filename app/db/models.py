@@ -64,6 +64,8 @@ async def init_db():
             address_text TEXT,
             work_time TEXT,
             image_file_id TEXT,
+            extra_info TEXT,
+            video_file_id TEXT,
             is_approved INTEGER NOT NULL DEFAULT 0,
             is_blocked INTEGER NOT NULL DEFAULT 0,
             is_closed INTEGER NOT NULL DEFAULT 0,
@@ -105,6 +107,7 @@ async def init_db():
         );
         """)
         
+
         # Safe migration: add columns if they don't exist (for existing databases)
         try:
             await db.execute("ALTER TABLE broadcasts ADD COLUMN media_type TEXT")
@@ -114,6 +117,16 @@ async def init_db():
             await db.execute("ALTER TABLE broadcasts ADD COLUMN media_file_id TEXT")
         except:
             pass  # Column already exists
+
+        # V9 Migration: Add extra_info and video_file_id to butchers
+        try:
+            await db.execute("ALTER TABLE butchers ADD COLUMN extra_info TEXT")
+        except:
+            pass
+        try:
+            await db.execute("ALTER TABLE butchers ADD COLUMN video_file_id TEXT")
+        except:
+            pass
 
 
         # Bot settings (Donat info)

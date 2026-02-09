@@ -22,6 +22,14 @@ router = Router()
 
 # ==================== NEARBY BUTCHERS ====================
 
+@router.message(F.text == "👥 Foydalanuvchilar soni")
+async def show_user_count_client(message: Message):
+    """Show total user count for client."""
+    from app.services.user_service import get_all_users_count
+    count = await get_all_users_count()
+    await message.answer(f"👥 Botdagi foydalanuvchilar soni: {count} ta")
+
+
 @router.message(F.text == "📍 Yaqin qassobxonalar")
 async def start_nearby_search(message: Message, state: FSMContext):
     """Start nearby search flow - V8: always request location."""
@@ -297,6 +305,19 @@ async def show_butcher_detail(callback: CallbackQuery, state: FSMContext):
         f"🕒 Ish vaqti: {work_time_str}\n"
         f"{price_text}"
     )
+
+    # V9: Add extra info if exists
+    if butcher.get('extra_info'):
+        import html
+        # extra_info is already sanitized when saving, but double check or just print
+        # It's better to NOT escape again if it's already escaped, but if we trust DB...
+        # Let's assume it was escaped on save. But 'html.escape' was used.
+        # So we can just put it. But wait, if I put it in HTML parse mode, escaped chars like &lt; will show as <.
+        # Yes, that's what we want if we want to show literal text.
+        # But if the user entered formatted text... The requirement said "safe sanitize".
+        # So treating it as plain text is safer.
+        detail_text += f"\n\n📝 <b>Qo'shimcha ma'lumot:</b>\n{butcher['extra_info']}"
+
     
     # Delete the list message
     await callback.message.delete()
@@ -373,3 +394,19 @@ async def send_buy_prices(callback: CallbackQuery):
         
     await callback.message.answer(text, parse_mode="HTML")
     await callback.answer()
+
+
+@router.callback_query(F.data.startswith("butcher_video:"))
+async def show_butcher_video(callback: CallbackQuery):
+    """Show butcher product video."""
+    butcher_id = int(callback.data.split(":")[1])
+    butcher = await get_butcher_detail(butcher_id)
+    
+    if butcher and butcher.get('video_file_id'):
+        await callback.message.answer_video(
+            video=butcher['video_file_id'],
+            caption=f"🎥 {butcher['shop_name']} mahsulotlari"
+        )
+        await callback.answer()
+    else:
+        await callback.answer("🎥 Video qo'yilmagan", show_alert=True)
