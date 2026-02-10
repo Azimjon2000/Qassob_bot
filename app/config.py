@@ -33,7 +33,7 @@ DB_PATH = BASE_DIR / "data" / "bot.db"
 PAGE_SIZE = 8
 
 # Radius options in km
-RADIUS_OPTIONS = [10, 20, 30]
+RADIUS_OPTIONS = [5, 10, 25]
 
 # Throttle settings
 THROTTLE_BATCH = 25

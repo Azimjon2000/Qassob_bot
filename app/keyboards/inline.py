@@ -101,6 +101,41 @@ def butcher_list_kb(butchers: list, page: int = 0, total_pages: int = 1, show_di
     return builder.as_markup()
 
 
+def role_select_kb() -> InlineKeyboardMarkup:
+    """Role selection inline keyboard."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="👤 Mijoz", callback_data="role:client"),
+                InlineKeyboardButton(text="🥩 Qassob", callback_data="role:butcher")
+            ]
+        ]
+    )
+
+
+def search_method_kb() -> InlineKeyboardMarkup:
+    """Search method selection inline keyboard."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="📍 Lokatsiya yuborish", callback_data="search:req_loc")],
+            [InlineKeyboardButton(text="🗺 Qo'lda tanlash", callback_data="search:manual")],
+            [InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_menu")]
+        ]
+    )
+
+
+def radius_kb(radii: list) -> InlineKeyboardMarkup:
+    """Radius selection inline keyboard."""
+    builder = InlineKeyboardBuilder()
+    for r in radii:
+        builder.button(text=f"{r} km", callback_data=f"radius:{r}")
+    
+    builder.adjust(3)
+    builder.row(InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_search_method"))
+    return builder.as_markup()
+    return builder.as_markup()
+
+
 def butcher_detail_kb(butcher_id: int, lang: str = "uz") -> InlineKeyboardMarkup:
     """Butcher detail view keyboard."""
     builder = InlineKeyboardBuilder()

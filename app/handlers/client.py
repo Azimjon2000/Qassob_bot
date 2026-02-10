@@ -113,23 +113,56 @@ async def show_user_count_client(callback: CallbackQuery):
     await callback.answer(f"👥 Botdagi foydalanuvchilar soni: {count} ta", show_alert=True)
 
 
-@router.callback_query(F.data == "client:nearby")
-async def start_nearby_search(callback: CallbackQuery, state: FSMContext):
-    """Start nearby search flow."""
-    # Delete menu message to clean up
-    await callback.message.delete()
+@router.message(F.text == "📍 Yaqin qassobxonalar")
+async def start_nearby_search(message: Message, state: FSMContext):
+    """Start nearby search flow - V9 Inline."""
+    from app.keyboards.inline import search_method_kb
+    await message.answer(
+        "🔎 Qidiruv turini tanlang:",
+        reply_markup=search_method_kb()
+    )
+    # We don't strictly need a state if we rely on callback data, 
+    # but for location message we need state.
+    await state.set_state(ClientSearch.waiting_search_mode)
+
+
+@router.callback_query(F.data == "search:req_loc")
+async def ask_for_location_inline(callback: CallbackQuery, state: FSMContext):
+    """Ask user to send location (Inline flow)."""
+    # Inline buttons cannot request location directly.
+    # We must ask user to send it via attachment menu or a reply button if we want.
+    # But user asked for inline.
+    # Strategy: Send a message "Click the paperclip or use this button" (if we want to provide a reply button as fallback)
+    # The requirement says: "Lokatsiya ulanganidan keyin chiqadigan “Radius” variantlari ham inline bo‘lsin."
+    # AND "Inline tugma bosilganda bot “Lokatsiyani yuboring” deb izohli xabar beradi"
     
+    await callback.message.delete()
     await callback.message.answer(
-        "📍 Iltimos, lokatsiyangizni yuboring:",
-        reply_markup=request_location_kb()
+        "📍 <b>Lokatsiya yuborish</b>\n\n"
+        "📎 Pastdagi skrepka (tugmacha) orqali <b>Geolokatsiya</b> ni yuboring.",
+        parse_mode="HTML",
+        reply_markup=request_location_kb() # Fallback reply button for easier access
     )
     await state.set_state(ClientSearch.waiting_location)
     await callback.answer()
 
 
+@router.callback_query(F.data == "search:manual")
+async def ask_for_region_inline(callback: CallbackQuery, state: FSMContext):
+    """Manual region selection (Inline flow)."""
+    await callback.message.delete()
+    regions = await list_regions()
+    await callback.message.answer(
+        "Viloyatni tanlang:",
+        reply_markup=regions_kb(regions)
+    )
+    await state.clear() # No state needed for inline navigation usually, or specific state
+    await callback.answer()
+
+
 @router.message(ClientSearch.waiting_location, F.location)
 async def process_search_location(message: Message, state: FSMContext):
-    """Process location for search."""
+    """Process location for search - Show Radius Inline."""
     lat = message.location.latitude
     lon = message.location.longitude
     
@@ -137,87 +170,88 @@ async def process_search_location(message: Message, state: FSMContext):
     await update_user(message.from_user.id, lat=lat, lon=lon)
     await state.update_data(lat=lat, lon=lon)
     
+    # V9: Show Inline Radius options
+    from app.keyboards.inline import radius_kb
+    from app.config import RADIUS_OPTIONS
+    
+    # Remove the Reply Keyboard (if it was shown as fallback)
     await message.answer(
-        "🔎 Qidiruv turini tanlang:",
-        reply_markup=search_mode_kb()
+        "✅ Lokatsiya qabul qilindi.",
+        reply_markup=ReplyKeyboardRemove()
     )
-    await state.set_state(ClientSearch.waiting_search_mode)
-
-
-@router.message(ClientSearch.waiting_search_mode)
-async def process_search_mode(message: Message, state: FSMContext):
-    """Process search mode selection."""
-    text = message.text
     
-    if text == "⬅️ Orqaga":
-        await state.clear()
-        # Restore Main Menu (Reply + Inline)
-        await message.answer("🏠 Asosiy menyu", reply_markup=client_main_kb())
-        await message.answer("Bo'limni tanlang:", reply_markup=client_menu_kb())
-        return
-
-    if text == "🗺 Qo'lda tanlash":
-        # Manual selection - showing regions
-        regions = await list_regions()
-        await message.answer(
-            "Viloyatni tanlang:",
-            reply_markup=regions_kb(regions)
-        )
-        await state.set_state(ClientSearch.waiting_region)
-        return
-
-    # Check for radius options
-    radius = None
-    for r in RADIUS_OPTIONS:
-        if text == f"{r} km":
-            radius = r
-            break
+    await message.answer(
+        "📏 Qidiruv radiusini tanlang:",
+        reply_markup=radius_kb(RADIUS_OPTIONS)
+    )
     
-    if radius:
-        # Radius search
-        data = await state.get_data()
-        lat, lon = data.get("lat"), data.get("lon")
-        
-        # We need a new service function or use logic here
-        # Let's get all approved butchers and filter/sort
-        butchers = await find_all_approved()
-        
-        # Calculate distance and sort
-        sorted_butchers = sort_by_distance(butchers, lat, lon)
-        
-        # Filter by radius
-        nearby_butchers = [b for b in sorted_butchers if b["distance"] <= radius]
-        
-        if not nearby_butchers:
-            await message.answer(
-                f"😕 {radius} km radiusda qassobxonalar topilmadi.",
-                reply_markup=search_mode_kb()
-            )
+    await state.set_state(ClientSearch.waiting_radius)
+
+
+@router.callback_query(F.data.startswith("radius:"))
+async def process_radius_selection(callback: CallbackQuery, state: FSMContext):
+    """Process radius selection and show results."""
+    radius = int(callback.data.split(":")[1])
+    
+    data = await state.get_data()
+    lat = data.get("lat")
+    lon = data.get("lon")
+    
+    if not lat or not lon:
+        # Fallback if state lost - try DB
+        user = await get_user(callback.from_user.id)
+        if user and user.get("lat"):
+            lat = user["lat"]
+            lon = user["lon"]
+        else:
+            await callback.message.answer("❌ Lokatsiya topilmadi. Qaytadan yuboring.")
             return
 
-        # Show results (paginated)
-        await state.update_data(
-            search_results=nearby_butchers, 
-            total_pages=(len(nearby_butchers) + PAGE_SIZE - 1) // PAGE_SIZE,
-            current_page=0,
-            show_distance=True
+    await callback.message.delete()
+    await callback.message.answer(f"🔍 {radius} km radiusda qidirilmoqda...")
+    
+    butchers = await find_nearby_by_radius(lat, lon, radius)
+    
+    if not butchers:
+        await callback.message.answer(
+            f"😔 {radius} km radiusda qassobxonalar topilmadi.",
+            reply_markup=client_menu_kb()
         )
+        return
+
+    # Add distance info
+    butchers_with_dist = sort_by_distance(butchers, lat, lon)
+    
+    # Show list
+    from app.keyboards.inline import butcher_list_kb
+    from app.config import PAGE_SIZE
+    
+    await state.update_data(
+        search_type="nearby",
+        radius=radius,
+        butchers=butchers_with_dist,
+        page=0
+    )
+    
+    msg = f"📍 {radius} km atrofida {len(butchers)} ta qassobxona topildi:"
+    kb = butcher_list_kb(butchers_with_dist[0:PAGE_SIZE], 0, (len(butchers) + PAGE_SIZE - 1) // PAGE_SIZE, show_distance=True)
+    
+    await callback.message.answer(msg, reply_markup=kb)
+
+
+@router.callback_query(F.data == "back_to_search_method")
+async def back_to_search_method(callback: CallbackQuery, state: FSMContext):
+    """Back to search method selection."""
+    from app.keyboards.inline import search_method_kb
+    await callback.message.edit_text(
+        "🔎 Qidiruv turini tanlang:",
+        reply_markup=search_method_kb()
+    )
         
-        page_butchers = nearby_butchers[:PAGE_SIZE]
-        total_pages = (len(nearby_butchers) + PAGE_SIZE - 1) // PAGE_SIZE
-        
-        await message.answer(
-            f"📍 {radius} km radiusda {len(nearby_butchers)} ta qassobxona topildi:",
-            reply_markup=ReplyKeyboardRemove() # Remove reply keyboard to show results clearly
-        )
-        await message.answer(
-            "Natijalar:",
-            reply_markup=butcher_list_kb(page_butchers, 0, total_pages, show_distance=True)
-        )
-        # Avoid clearing state so pagination works (or use specific state)
-        # We can keep waiting_search_mode or switch to a list viewing state
-    else:
-        await message.answer("❌ Noto'g'ri buyruq. Qidiruv turini tanlang:")
+    await callback.message.edit_text(
+        "🔎 Qidiruv turini tanlang:",
+        reply_markup=search_method_kb()
+    )
 
 
 # ==================== MANUAL SEARCH & CHEAPEST PRICES ====================
