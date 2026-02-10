@@ -113,17 +113,22 @@ async def show_user_count_client(callback: CallbackQuery):
     await callback.answer(f"👥 Botdagi foydalanuvchilar soni: {count} ta", show_alert=True)
 
 
-@router.message(F.text == "📍 Yaqin qassobxonalar")
-async def start_nearby_search(message: Message, state: FSMContext):
+@router.callback_query(F.data == "client:nearby")
+async def start_nearby_search(callback: CallbackQuery, state: FSMContext):
     """Start nearby search flow - V9 Inline."""
     from app.keyboards.inline import search_method_kb
-    await message.answer(
+    
+    # Clean up previous menu
+    await callback.message.delete()
+    
+    await callback.message.answer(
         "🔎 Qidiruv turini tanlang:",
         reply_markup=search_method_kb()
     )
     # We don't strictly need a state if we rely on callback data, 
     # but for location message we need state.
     await state.set_state(ClientSearch.waiting_search_mode)
+    await callback.answer()
 
 
 @router.callback_query(F.data == "search:req_loc")
