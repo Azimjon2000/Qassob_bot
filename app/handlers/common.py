@@ -1,6 +1,6 @@
 """Common handlers - /start, settings, about."""
 from aiogram import Router, F
-from aiogram.types import Message, ContentType, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import Message, ContentType, ReplyKeyboardMarkup, KeyboardButton, CallbackQuery
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 
