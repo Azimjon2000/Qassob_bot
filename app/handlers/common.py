@@ -63,14 +63,17 @@ async def cmd_start(message: Message, state: FSMContext):
         await state.clear()
         return
     
-    # IF ROLE IS PENDING -> SHOW PICKER
+    # IF ROLE IS PENDING -> SHOW INLINE PICKER
     if role == "pending" or not role:
+        from app.keyboards.inline import role_select_kb
         await message.answer(
             f"👋 Assalomu alaykum, {user.get('name', 'foydalanuvchi')}!\n\n"
             "Botdan foydalanish uchun rolingizni tanlang:",
-            reply_markup=role_picker_kb()
+            reply_markup=role_select_kb()
         )
-        await state.set_state(RoleSelect.waiting_role)
+        # We don't need a specific state for inline callback, 
+        # but clearing state is good practice to avoid interference.
+        await state.clear()
         return
 
     # IF ROLE EXISTS -> CHECK REGISTRATION OR SHOW MENU
@@ -88,23 +91,6 @@ async def cmd_start(message: Message, state: FSMContext):
         await state.clear()
             
     elif role == "butcher":
-        # Butcher registration is complex (shop name etc)
-        # We check if they have shop_name set in butchers table?
-        # Or just show main menu if they have a butcher record?
-        # Simple check: do they have phone?
-        # Better: check butcher table. But we are in common.py.
-        # Let's just go to main menu if text handlers work.
-        # Logic: If butcher, show menu. They can click "Lokatsiya yangilash" etc.
-        # But if they are half-registered?
-        # Let's assume if they have role 'butcher', they finished registration 
-        # OR they selected it and need to register.
-        
-        # If we just selected role, we might not have butcher record.
-        # So we should probably check if we need to start registration.
-        # But for now, let's just show menu. If they try to do something, 
-        # butcher.py handlers check for record/approval.
-        # Wait, plan says: "butcher -> ButcherReg -> butcher menu"
-        
         await message.answer(
             "🏠 Asosiy menyu (Qassob)",
             reply_markup=butcher_main_kb()
@@ -112,51 +98,42 @@ async def cmd_start(message: Message, state: FSMContext):
         await state.clear()
 
 
-@router.message(RoleSelect.waiting_role)
-async def process_role_selection(message: Message, state: FSMContext):
-    """Process role selection."""
-    text = message.text
-    telegram_id = message.from_user.id
+@router.callback_query(F.data.startswith("role:"))
+async def process_role_selection_inline(callback: CallbackQuery, state: FSMContext):
+    """Process role selection from inline keyboard."""
+    role_type = callback.data.split(":")[1]
+    telegram_id = callback.from_user.id
+    name = callback.from_user.full_name
     
-    if text == "👤 Mijoz":
-        # Client registration simplified:
-        # 1. Update name from Telegram profile
-        # 2. Skip phone and location
-        # 3. Show main menu immediately
-        
-        name = message.from_user.full_name
+    # Delete the inline keyboard message
+    await callback.message.delete()
+    
+    if role_type == "client":
         await update_user(telegram_id, name=name)
         await set_role(telegram_id, "client")
-        
-        # Notify admin about new user (silent or existing logic)
-        await notify_new_user(message.bot, telegram_id)
+        await notify_new_user(callback.bot, telegram_id)
 
-        await message.answer(
+        await callback.message.answer(
             "🏠 Asosiy menyu",
             reply_markup=client_main_kb()
         )
-        await message.answer(
+        await callback.message.answer(
             f"✅ Xush kelibsiz, {name}!\n"
             "Bo'limni tanlang:",
             reply_markup=client_menu_kb()
         )
-        await state.clear()
         
-    elif text == "🥩 Qassob":
+    elif role_type == "butcher":
         await set_role(telegram_id, "butcher")
-        await message.answer(
+        await callback.message.answer(
             "✅ Siz <b>Qassob</b> rolini tanladingiz.\n\n"
             "Do'kon nomini kiriting:",
             parse_mode="HTML",
             reply_markup=back_kb()
         )
         await state.set_state(ButcherReg.shop_name)
-        
-    else:
-        await message.answer(
-            "❌ Iltimos, quyidagi tugmalardan birini tanlang:",
-            reply_markup=role_picker_kb()
-        )
+    
+    await callback.answer()
 
 
 # ==================== CLIENT REGISTRATION ====================
