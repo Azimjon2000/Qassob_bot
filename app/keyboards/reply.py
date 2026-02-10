@@ -18,9 +18,7 @@ def client_main_kb() -> ReplyKeyboardMarkup:
     """Main menu for clients."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="📍 Yaqin qassobxonalar")],
-            [KeyboardButton(text="🥩 Go'sht narxlari"), KeyboardButton(text="👥 Foydalanuvchilar soni")],
-            [KeyboardButton(text="ℹ️ Bot haqida"), KeyboardButton(text="⚙️ Sozlamalar")]
+            [KeyboardButton(text="🏠 Asosiy menyu")]
         ],
         resize_keyboard=True
     )

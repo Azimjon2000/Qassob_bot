@@ -5,6 +5,41 @@ from app.config import PAGE_SIZE, MEAT_SELL_CATEGORIES, MEAT_BUY_CATEGORIES
 from app.utils.i18n import t
 
 
+def client_menu_kb() -> InlineKeyboardMarkup:
+    """Client main menu (Inline)."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="📍 Yaqin qassobxonalar", callback_data="client:nearby")],
+            [InlineKeyboardButton(text="🥩 Go'sht narxlari", callback_data="client:prices"),
+             InlineKeyboardButton(text="👥 Foydalanuvchilar soni", callback_data="client:count")],
+            [InlineKeyboardButton(text="ℹ️ Bot haqida", callback_data="client:about"),
+             InlineKeyboardButton(text="⚙️ Sozlamalar", callback_data="client:settings")]
+        ]
+    )
+
+
+def client_settings_kb() -> InlineKeyboardMarkup:
+    """Client settings (Inline)."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🌐 Tilni o'zgartirish", callback_data="settings:lang")],
+            [InlineKeyboardButton(text="📩 Adminga murojaat", callback_data="settings:contact")],
+            [InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_menu")]
+        ]
+    )
+
+
+def language_inline_kb() -> InlineKeyboardMarkup:
+    """Language selection (Inline)."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🇺🇿 O'zbek", callback_data="lang:uz"),
+             InlineKeyboardButton(text="🇷🇺 Русский", callback_data="lang:ru")],
+            [InlineKeyboardButton(text="⬅️ Orqaga", callback_data="client:settings")]
+        ]
+    )
+
+
 def regions_kb(regions: list, lang: str = "uz") -> InlineKeyboardMarkup:
     """Inline keyboard with regions."""
     builder = InlineKeyboardBuilder()

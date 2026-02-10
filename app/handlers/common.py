@@ -13,6 +13,7 @@ from app.keyboards.reply import (
     request_contact_kb, request_location_kb, settings_kb, butcher_settings_kb,
     role_picker_kb, back_kb
 )
+from app.keyboards.inline import client_menu_kb, client_settings_kb
 from app.config import ADMINS, add_admin
 from app.utils.i18n import t
 
@@ -75,19 +76,16 @@ async def cmd_start(message: Message, state: FSMContext):
     # IF ROLE EXISTS -> CHECK REGISTRATION OR SHOW MENU
 
     if role == "client":
-        if user.get("name") and user.get("phone"):
-            # Fully registered
-            await message.answer(
-                "🏠 Asosiy menyu",
-                reply_markup=client_main_kb()
-            )
-            await state.clear()
-        else:
-            # Continue registration
-            await message.answer(
-                "Iltimos, ismingizni kiriting:"
-            )
-            await state.set_state(ClientReg.waiting_name)
+        # Always show main menu for client (no registration check needed as we skip it)
+        await message.answer(
+            "🏠 Asosiy menyu",
+            reply_markup=client_main_kb()
+        )
+        await message.answer(
+            "Xush kelibsiz! Bo'limni tanlang:",
+            reply_markup=client_menu_kb()
+        )
+        await state.clear()
             
     elif role == "butcher":
         # Butcher registration is complex (shop name etc)
@@ -121,14 +119,28 @@ async def process_role_selection(message: Message, state: FSMContext):
     telegram_id = message.from_user.id
     
     if text == "👤 Mijoz":
+        # Client registration simplified:
+        # 1. Update name from Telegram profile
+        # 2. Skip phone and location
+        # 3. Show main menu immediately
+        
+        name = message.from_user.full_name
+        await update_user(telegram_id, name=name)
         await set_role(telegram_id, "client")
+        
+        # Notify admin about new user (silent or existing logic)
+        await notify_new_user(message.bot, telegram_id)
+
         await message.answer(
-            "✅ Siz <b>Mijoz</b> rolini tanladingiz.\n\n"
-            "Iltimos, ismingizni kiriting:",
-            parse_mode="HTML",
-            reply_markup=back_kb() # Maybe no back here?
+            "🏠 Asosiy menyu",
+            reply_markup=client_main_kb()
         )
-        await state.set_state(ClientReg.waiting_name)
+        await message.answer(
+            f"✅ Xush kelibsiz, {name}!\n"
+            "Bo'limni tanlang:",
+            reply_markup=client_menu_kb()
+        )
+        await state.clear()
         
     elif text == "🥩 Qassob":
         await set_role(telegram_id, "butcher")
@@ -250,6 +262,12 @@ async def go_back(message: Message, state: FSMContext):
         "🏠 Asosiy menyu",
         reply_markup=get_main_kb_for_role(role, telegram_id)
     )
+    # If client, also send inline menu
+    if role == "client":
+        await message.answer(
+            "Bo'limni tanlang:",
+            reply_markup=client_menu_kb()
+        )
 
 
 @router.message(F.text == "ℹ️ Bot haqida")

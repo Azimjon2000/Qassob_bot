@@ -13,32 +13,118 @@ from app.keyboards.reply import (
     search_mode_kb, request_location_kb, client_main_kb, back_kb
 )
 from app.keyboards.inline import (
-    regions_kb, districts_kb, butcher_list_kb, butcher_detail_kb
+    regions_kb, districts_kb, butcher_list_kb, butcher_detail_kb,
+    client_menu_kb, client_settings_kb, language_inline_kb
 )
 from app.config import PAGE_SIZE, RADIUS_OPTIONS
 
 router = Router()
 
 
+# ==================== MAIN MENU & SETTINGS HANDLERS ====================
+
+@router.message(F.text == "🏠 Asosiy menyu")
+async def show_main_menu_text(message: Message, state: FSMContext):
+    """Resend main menu."""
+    from app.services.user_service import get_user
+    user = await get_user(message.from_user.id)
+    role = user.get("role") if user else "client"
+    
+    if role == "client":
+        await message.answer("🏠 Asosiy menyu", reply_markup=client_main_kb())
+        await message.answer("Bo'limni tanlang:", reply_markup=client_menu_kb())
+        await state.clear()
+
+
+@router.callback_query(F.data == "client:about")
+async def client_about_handler(callback: CallbackQuery):
+    """Show about info."""
+    from app.services.donate_service import get_support_profile
+    contact = await get_support_profile()
+    
+    text = (
+        "🥩 <b>Qassobxona topish boti</b>\n\n"
+        "Bu bot orqali siz:\n"
+        "• Yaqin atrofdagi qassobxonalarni topishingiz\n"
+        "• Go'sht narxlarini solishtirishingiz\n"
+        "• Eng arzon narxlarni ko'rishingiz mumkin\n\n"
+        f"📞 Murojaat uchun: {contact}"
+    )
+    from app.keyboards.inline import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="⬅️ Asosiy menyu", callback_data="back_to_menu")
+    
+    await callback.message.edit_text(text, parse_mode="HTML", reply_markup=builder.as_markup())
+    await callback.answer()
+
+
+@router.callback_query(F.data == "client:settings")
+async def client_settings_handler(callback: CallbackQuery):
+    """Show client settings."""
+    await callback.message.edit_text("⚙️ Sozlamalar", reply_markup=client_settings_kb())
+    await callback.answer()
+
+
+@router.callback_query(F.data == "settings:contact")
+async def client_contact_handler(callback: CallbackQuery):
+    """Show admin contact."""
+    from app.services.donate_service import get_support_profile
+    contact = await get_support_profile()
+    text = (
+        "📩 Adminga murojaat qilish uchun quyidagi kontaktga yozing:\n\n"
+        f"{contact}"
+    )
+    from app.keyboards.inline import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="⬅️ Orqaga", callback_data="client:settings")
+    
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await callback.answer()
+
+
+@router.callback_query(F.data == "settings:lang")
+async def client_lang_handler(callback: CallbackQuery):
+    """Show language selection."""
+    await callback.message.edit_text("🌐 Tilni tanlang:", reply_markup=language_inline_kb())
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("lang:"))
+async def client_lang_process(callback: CallbackQuery):
+    """Process language selection."""
+    lang = callback.data.split(":")[1]
+    await update_user(callback.from_user.id, language=lang)
+    
+    # Show success alert
+    msg = "🇺🇿 Til o'zgartirildi!" if lang == "uz" else "🇷🇺 Язык изменен!"
+    await callback.answer(msg, show_alert=True)
+    
+    # Go back to settings
+    await callback.message.edit_text("⚙️ Sozlamalar", reply_markup=client_settings_kb())
+
+
 # ==================== NEARBY BUTCHERS ====================
 
-@router.message(F.text == "👥 Foydalanuvchilar soni")
-async def show_user_count_client(message: Message):
+@router.callback_query(F.data == "client:count")
+async def show_user_count_client(callback: CallbackQuery):
     """Show total user count for client."""
     from app.services.user_service import get_all_users_count
     count = await get_all_users_count()
-    await message.answer(f"👥 Botdagi foydalanuvchilar soni: {count} ta")
+    await callback.answer(f"👥 Botdagi foydalanuvchilar soni: {count} ta", show_alert=True)
 
 
-@router.message(F.text == "📍 Yaqin qassobxonalar")
-async def start_nearby_search(message: Message, state: FSMContext):
-    """Start nearby search flow - V8: always request location."""
-    # V8 requirement: ALWAYS request location for each search
-    await message.answer(
+@router.callback_query(F.data == "client:nearby")
+async def start_nearby_search(callback: CallbackQuery, state: FSMContext):
+    """Start nearby search flow."""
+    # Delete menu message to clean up
+    await callback.message.delete()
+    
+    await callback.message.answer(
         "📍 Iltimos, lokatsiyangizni yuboring:",
         reply_markup=request_location_kb()
     )
     await state.set_state(ClientSearch.waiting_location)
+    await callback.answer()
 
 
 @router.message(ClientSearch.waiting_location, F.location)
@@ -65,7 +151,9 @@ async def process_search_mode(message: Message, state: FSMContext):
     
     if text == "⬅️ Orqaga":
         await state.clear()
+        # Restore Main Menu (Reply + Inline)
         await message.answer("🏠 Asosiy menyu", reply_markup=client_main_kb())
+        await message.answer("Bo'limni tanlang:", reply_markup=client_menu_kb())
         return
 
     if text == "🗺 Qo'lda tanlash":
@@ -134,17 +222,18 @@ async def process_search_mode(message: Message, state: FSMContext):
 
 # ==================== MANUAL SEARCH & CHEAPEST PRICES ====================
 
-@router.message(F.text == "🥩 Go'sht narxlari")
-async def start_price_search(message: Message, state: FSMContext):
+@router.callback_query(F.data == "client:prices")
+async def start_price_search(callback: CallbackQuery, state: FSMContext):
     """Start price search flow."""
     regions = await list_regions()
-    await message.answer(
+    await callback.message.edit_text(
         "Viloyatni tanlang:",
         reply_markup=regions_kb(regions)
     )
     # Reuse waiting_region state but with a flag
     await state.update_data(search_type="prices")
     await state.set_state(ClientSearch.waiting_region)
+    await callback.answer()
 
 
 @router.callback_query(ClientSearch.waiting_region, F.data.startswith("region:"))
@@ -203,7 +292,11 @@ async def process_district_selection(callback: CallbackQuery, state: FSMContext)
             text += f"🕒 {info['updated_at'][:16]}\n\n"
         
         await callback.message.edit_text(text, parse_mode="HTML")
-        await callback.message.answer("🏠 Asosiy menyu", reply_markup=client_main_kb())
+        # Give back button to menu
+        from app.keyboards.inline import InlineKeyboardBuilder
+        builder = InlineKeyboardBuilder()
+        builder.button(text="⬅️ Asosiy menyu", callback_data="back_to_menu")
+        await callback.message.edit_reply_markup(reply_markup=builder.as_markup())
         await state.clear()
         
     else:
@@ -267,6 +360,7 @@ async def back_to_main_menu(callback: CallbackQuery, state: FSMContext):
     """Go back to main reply menu."""
     await callback.message.delete()
     await callback.message.answer("🏠 Asosiy menyu", reply_markup=client_main_kb())
+    await callback.message.answer("Bo'limni tanlang:", reply_markup=client_menu_kb())
     await state.clear()
 
 
