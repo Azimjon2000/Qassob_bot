@@ -275,7 +275,7 @@ async def start_price_search(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-@router.callback_query(ClientSearch.waiting_region, F.data.startswith("region:"))
+@router.callback_query(F.data.startswith("region:"))
 async def process_region_selection(callback: CallbackQuery, state: FSMContext):
     """Process region for manual search or price search."""
     region_id = int(callback.data.split(":")[1])
@@ -290,7 +290,7 @@ async def process_region_selection(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-@router.callback_query(ClientSearch.waiting_district, F.data == "back_to_regions")
+@router.callback_query(F.data == "back_to_regions")
 async def back_to_regions_client(callback: CallbackQuery, state: FSMContext):
     """Back to region list."""
     regions = await list_regions()
@@ -302,7 +302,7 @@ async def back_to_regions_client(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-@router.callback_query(ClientSearch.waiting_district, F.data.startswith("district:"))
+@router.callback_query(F.data.startswith("district:"))
 async def process_district_selection(callback: CallbackQuery, state: FSMContext):
     """Process district selection."""
     district_id = int(callback.data.split(":")[1])
