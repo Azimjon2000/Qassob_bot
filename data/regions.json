@@ -1,0 +1,267 @@
+{
+  "regions": [
+    {
+      "name_uz": "Toshkent shahri",
+      "name_ru": "г. Ташкент",
+      "districts": [
+        {"name_uz": "Bektemir", "name_ru": "Бектемир"},
+        {"name_uz": "Chilonzor", "name_ru": "Чиланзар"},
+        {"name_uz": "Yakkasaroy", "name_ru": "Яккасарай"},
+        {"name_uz": "Mirobod", "name_ru": "Мирабад"},
+        {"name_uz": "Mirzo Ulug'bek", "name_ru": "Мирзо Улугбек"},
+        {"name_uz": "Sergeli", "name_ru": "Сергели"},
+        {"name_uz": "Shayxontohur", "name_ru": "Шайхантахур"},
+        {"name_uz": "Olmazor", "name_ru": "Алмазар"},
+        {"name_uz": "Uchtepa", "name_ru": "Учтепа"},
+        {"name_uz": "Yashnobod", "name_ru": "Яшнабад"},
+        {"name_uz": "Yunusobod", "name_ru": "Юнусабад"}
+      ]
+    },
+    {
+      "name_uz": "Toshkent viloyati",
+      "name_ru": "Ташкентская область",
+      "districts": [
+        {"name_uz": "Angren", "name_ru": "Ангрен"},
+        {"name_uz": "Olmaliq", "name_ru": "Алмалык"},
+        {"name_uz": "Chirchiq", "name_ru": "Чирчик"},
+        {"name_uz": "Bekobod", "name_ru": "Бекабад"},
+        {"name_uz": "Bo'stonliq", "name_ru": "Бостанлык"},
+        {"name_uz": "Zangiota", "name_ru": "Зангиата"},
+        {"name_uz": "Qibray", "name_ru": "Кибрай"},
+        {"name_uz": "Chinoz", "name_ru": "Чиназ"},
+        {"name_uz": "Ohangaron", "name_ru": "Ахангаран"},
+        {"name_uz": "Parkent", "name_ru": "Паркент"},
+        {"name_uz": "Piskent", "name_ru": "Пскент"},
+        {"name_uz": "Yuqorichirchiq", "name_ru": "Верхнечирчикский"},
+        {"name_uz": "O'rtachirchiq", "name_ru": "Среднечирчикский"},
+        {"name_uz": "Quyi chirchiq", "name_ru": "Нижнечирчикский"}
+      ]
+    },
+    {
+      "name_uz": "Andijon viloyati",
+      "name_ru": "Андижанская область",
+      "districts": [
+        {"name_uz": "Andijon shahri", "name_ru": "г. Андижан"},
+        {"name_uz": "Andijon tumani", "name_ru": "Андижанский район"},
+        {"name_uz": "Asaka", "name_ru": "Асака"},
+        {"name_uz": "Baliqchi", "name_ru": "Балыкчи"},
+        {"name_uz": "Bo'z", "name_ru": "Буз"},
+        {"name_uz": "Buloqboshi", "name_ru": "Булакбаши"},
+        {"name_uz": "Izboskan", "name_ru": "Избоскан"},
+        {"name_uz": "Jalaquduq", "name_ru": "Джалакудук"},
+        {"name_uz": "Xo'jaobod", "name_ru": "Ходжаабад"},
+        {"name_uz": "Marhamat", "name_ru": "Мархамат"},
+        {"name_uz": "Oltinko'l", "name_ru": "Алтынкуль"},
+        {"name_uz": "Paxtaobod", "name_ru": "Пахтаабад"},
+        {"name_uz": "Shahrixon", "name_ru": "Шахрихан"},
+        {"name_uz": "Ulug'nor", "name_ru": "Улугнор"},
+        {"name_uz": "Qo'rg'ontepa", "name_ru": "Кургантепа"}
+      ]
+    },
+    {
+      "name_uz": "Buxoro viloyati",
+      "name_ru": "Бухарская область",
+      "districts": [
+        {"name_uz": "Buxoro shahri", "name_ru": "г. Бухара"},
+        {"name_uz": "Kogon", "name_ru": "Каган"},
+        {"name_uz": "G'ijduvon", "name_ru": "Гиждуван"},
+        {"name_uz": "Jondor", "name_ru": "Жондор"},
+        {"name_uz": "Olot", "name_ru": "Алат"},
+        {"name_uz": "Peshku", "name_ru": "Пешку"},
+        {"name_uz": "Qorako'l", "name_ru": "Каракуль"},
+        {"name_uz": "Romitan", "name_ru": "Ромитан"},
+        {"name_uz": "Shofirkon", "name_ru": "Шафиркан"},
+        {"name_uz": "Vobkent", "name_ru": "Вабкент"},
+        {"name_uz": "Qorovulbozor", "name_ru": "Караулбазар"}
+      ]
+    },
+    {
+      "name_uz": "Farg'ona viloyati",
+      "name_ru": "Ферганская область",
+      "districts": [
+        {"name_uz": "Farg'ona shahri", "name_ru": "г. Фергана"},
+        {"name_uz": "Marg'ilon", "name_ru": "Маргилан"},
+        {"name_uz": "Quvasoy", "name_ru": "Кувасай"},
+        {"name_uz": "Qo'qon", "name_ru": "Коканд"},
+        {"name_uz": "Bag'dod", "name_ru": "Багдад"},
+        {"name_uz": "Beshariq", "name_ru": "Бешарык"},
+        {"name_uz": "Buvayda", "name_ru": "Бувайда"},
+        {"name_uz": "Dang'ara", "name_ru": "Дангара"},
+        {"name_uz": "Furqat", "name_ru": "Фуркат"},
+        {"name_uz": "Oltiariq", "name_ru": "Алтыарык"},
+        {"name_uz": "Quva", "name_ru": "Кува"},
+        {"name_uz": "Rishton", "name_ru": "Риштан"},
+        {"name_uz": "So'x", "name_ru": "Сох"},
+        {"name_uz": "Toshloq", "name_ru": "Ташлак"},
+        {"name_uz": "Uchko'prik", "name_ru": "Учкуприк"},
+        {"name_uz": "O'zbekiston", "name_ru": "Узбекистан"},
+        {"name_uz": "Yozyovon", "name_ru": "Язъяван"}
+      ]
+    },
+    {
+      "name_uz": "Jizzax viloyati",
+      "name_ru": "Джизакская область",
+      "districts": [
+        {"name_uz": "Jizzax shahri", "name_ru": "г. Джизак"},
+        {"name_uz": "Arnasoy", "name_ru": "Арнасай"},
+        {"name_uz": "Baxmal", "name_ru": "Бахмал"},
+        {"name_uz": "Do'stlik", "name_ru": "Дустлик"},
+        {"name_uz": "Forish", "name_ru": "Фориш"},
+        {"name_uz": "G'allaorol", "name_ru": "Галляарал"},
+        {"name_uz": "Mirzacho'l", "name_ru": "Мирзачуль"},
+        {"name_uz": "Paxtakor", "name_ru": "Пахтакор"},
+        {"name_uz": "Yangiobod", "name_ru": "Янгиобод"},
+        {"name_uz": "Zafarobod", "name_ru": "Зафарабад"},
+        {"name_uz": "Zarbdor", "name_ru": "Зарбдар"},
+        {"name_uz": "Zomin", "name_ru": "Замин"}
+      ]
+    },
+    {
+      "name_uz": "Xorazm viloyati",
+      "name_ru": "Хорезмская область",
+      "districts": [
+        {"name_uz": "Urganch shahri", "name_ru": "г. Ургенч"},
+        {"name_uz": "Xiva", "name_ru": "Хива"},
+        {"name_uz": "Bog'ot", "name_ru": "Багат"},
+        {"name_uz": "Gurlan", "name_ru": "Гурлен"},
+        {"name_uz": "Qo'shko'pir", "name_ru": "Кошкупыр"},
+        {"name_uz": "Shovot", "name_ru": "Шават"},
+        {"name_uz": "Urganch tumani", "name_ru": "Ургенчский район"},
+        {"name_uz": "Xonqa", "name_ru": "Ханка"},
+        {"name_uz": "Hazorasp", "name_ru": "Хазарасп"},
+        {"name_uz": "Yangiariq", "name_ru": "Янгиарык"},
+        {"name_uz": "Yangibozor", "name_ru": "Янгибазар"},
+        {"name_uz": "Tuproqqal'a", "name_ru": "Тупроккала"}
+      ]
+    },
+    {
+      "name_uz": "Namangan viloyati",
+      "name_ru": "Наманганская область",
+      "districts": [
+        {"name_uz": "Namangan shahri", "name_ru": "г. Наманган"},
+        {"name_uz": "Chortoq", "name_ru": "Чартак"},
+        {"name_uz": "Chust", "name_ru": "Чуст"},
+        {"name_uz": "Kosonsoy", "name_ru": "Касансай"},
+        {"name_uz": "Mingbuloq", "name_ru": "Мингбулак"},
+        {"name_uz": "Namangan tumani", "name_ru": "Наманганский район"},
+        {"name_uz": "Norin", "name_ru": "Нарын"},
+        {"name_uz": "Pop", "name_ru": "Пап"},
+        {"name_uz": "To'raqo'rg'on", "name_ru": "Туракурган"},
+        {"name_uz": "Uchqo'rg'on", "name_ru": "Учкурган"},
+        {"name_uz": "Yangiqo'rg'on", "name_ru": "Янгикурган"}
+      ]
+    },
+    {
+      "name_uz": "Navoiy viloyati",
+      "name_ru": "Навоийская область",
+      "districts": [
+        {"name_uz": "Navoiy shahri", "name_ru": "г. Навои"},
+        {"name_uz": "Zarafshon", "name_ru": "Зарафшан"},
+        {"name_uz": "Karmana", "name_ru": "Кармана"},
+        {"name_uz": "Konimex", "name_ru": "Конимех"},
+        {"name_uz": "Navbahor", "name_ru": "Навбахор"},
+        {"name_uz": "Nurota", "name_ru": "Нурата"},
+        {"name_uz": "Qiziltepa", "name_ru": "Кызылтепа"},
+        {"name_uz": "Tomdi", "name_ru": "Тамды"},
+        {"name_uz": "Uchquduq", "name_ru": "Учкудук"},
+        {"name_uz": "Xatirchi", "name_ru": "Хатырчи"}
+      ]
+    },
+    {
+      "name_uz": "Qashqadaryo viloyati",
+      "name_ru": "Кашкадарьинская область",
+      "districts": [
+        {"name_uz": "Qarshi shahri", "name_ru": "г. Карши"},
+        {"name_uz": "Shahrisabz", "name_ru": "Шахрисабз"},
+        {"name_uz": "Chiroqchi", "name_ru": "Чиракчи"},
+        {"name_uz": "Dehqonobod", "name_ru": "Дехканабад"},
+        {"name_uz": "G'uzor", "name_ru": "Гузар"},
+        {"name_uz": "Kasbi", "name_ru": "Касби"},
+        {"name_uz": "Kitob", "name_ru": "Китаб"},
+        {"name_uz": "Koson", "name_ru": "Касан"},
+        {"name_uz": "Mirishkor", "name_ru": "Миришкор"},
+        {"name_uz": "Muborak", "name_ru": "Мубарек"},
+        {"name_uz": "Nishon", "name_ru": "Нишан"},
+        {"name_uz": "Qamashi", "name_ru": "Камаши"},
+        {"name_uz": "Yakkabog'", "name_ru": "Яккабаг"}
+      ]
+    },
+    {
+      "name_uz": "Samarqand viloyati",
+      "name_ru": "Самаркандская область",
+      "districts": [
+        {"name_uz": "Samarqand shahri", "name_ru": "г. Самарканд"},
+        {"name_uz": "Kattaqo'rg'on", "name_ru": "Каттакурган"},
+        {"name_uz": "Bulung'ur", "name_ru": "Булунгур"},
+        {"name_uz": "Ishtixon", "name_ru": "Иштыхан"},
+        {"name_uz": "Jomboy", "name_ru": "Джамбай"},
+        {"name_uz": "Narpay", "name_ru": "Нарпай"},
+        {"name_uz": "Nurobod", "name_ru": "Нурабад"},
+        {"name_uz": "Oqdaryo", "name_ru": "Акдарья"},
+        {"name_uz": "Past-darg'om", "name_ru": "Пастдаргом"},
+        {"name_uz": "Paxtachi", "name_ru": "Пахтачи"},
+        {"name_uz": "Payariq", "name_ru": "Пайарик"},
+        {"name_uz": "Samarqand tumani", "name_ru": "Самаркандский район"},
+        {"name_uz": "Toyloq", "name_ru": "Тайлак"},
+        {"name_uz": "Urgut", "name_ru": "Ургут"}
+      ]
+    },
+    {
+      "name_uz": "Sirdaryo viloyati",
+      "name_ru": "Сырдарьинская область",
+      "districts": [
+        {"name_uz": "Guliston shahri", "name_ru": "г. Гулистан"},
+        {"name_uz": "Yangiyer", "name_ru": "Янгиер"},
+        {"name_uz": "Shirin", "name_ru": "Ширин"},
+        {"name_uz": "Boyovut", "name_ru": "Баяут"},
+        {"name_uz": "Guliston tumani", "name_ru": "Гулистанский район"},
+        {"name_uz": "Xovos", "name_ru": "Хавас"},
+        {"name_uz": "Mirzaobod", "name_ru": "Мирзаабад"},
+        {"name_uz": "Oqoltin", "name_ru": "Акалтын"},
+        {"name_uz": "Sardoba", "name_ru": "Сардоба"},
+        {"name_uz": "Sayxunobod", "name_ru": "Сайхунабад"}
+      ]
+    },
+    {
+      "name_uz": "Surxondaryo viloyati",
+      "name_ru": "Сурхандарьинская область",
+      "districts": [
+        {"name_uz": "Termiz shahri", "name_ru": "г. Термез"},
+        {"name_uz": "Angor", "name_ru": "Ангор"},
+        {"name_uz": "Bandixon", "name_ru": "Бандыхан"},
+        {"name_uz": "Boysun", "name_ru": "Байсун"},
+        {"name_uz": "Denov", "name_ru": "Денау"},
+        {"name_uz": "Jarqo'rg'on", "name_ru": "Джаркурган"},
+        {"name_uz": "Muzrabot", "name_ru": "Музрабад"},
+        {"name_uz": "Oltinsoy", "name_ru": "Алтынсай"},
+        {"name_uz": "Qiziriq", "name_ru": "Кизирик"},
+        {"name_uz": "Qumqo'rg'on", "name_ru": "Кумкурган"},
+        {"name_uz": "Sariosiyo", "name_ru": "Сариасия"},
+        {"name_uz": "Sherobod", "name_ru": "Шерабад"},
+        {"name_uz": "Sho'rchi", "name_ru": "Шурчи"},
+        {"name_uz": "Termiz tumani", "name_ru": "Термезский район"},
+        {"name_uz": "Uzun", "name_ru": "Узун"}
+      ]
+    },
+    {
+      "name_uz": "Qoraqalpog'iston Respublikasi",
+      "name_ru": "Республика Каракалпакстан",
+      "districts": [
+        {"name_uz": "Nukus shahri", "name_ru": "г. Нукус"},
+        {"name_uz": "Amudaryo", "name_ru": "Амударья"},
+        {"name_uz": "Beruniy", "name_ru": "Беруни"},
+        {"name_uz": "Chimboy", "name_ru": "Чимбай"},
+        {"name_uz": "Ellikqal'a", "name_ru": "Элликкала"},
+        {"name_uz": "Kegeyli", "name_ru": "Кегейли"},
+        {"name_uz": "Mo'ynoq", "name_ru": "Муйнак"},
+        {"name_uz": "Nukus tumani", "name_ru": "Нукусский район"},
+        {"name_uz": "Qo'ng'irot", "name_ru": "Кунград"},
+        {"name_uz": "Qanliko'l", "name_ru": "Канлыкуль"},
+        {"name_uz": "Shumanay", "name_ru": "Шуманай"},
+        {"name_uz": "Taxtako'pir", "name_ru": "Тахтакупыр"},
+        {"name_uz": "To'rtko'l", "name_ru": "Турткуль"},
+        {"name_uz": "Xo'jayli", "name_ru": "Ходжейли"}
+      ]
+    }
+  ]
+}
