@@ -19,8 +19,8 @@ async def main():
 
     # Include routers
     dp.include_router(common.router)
-    dp.include_router(client.router)
     dp.include_router(butcher.router)
+    dp.include_router(client.router)
     dp.include_router(admin.router)
 
     print("🥩 Qassobxona Bot ishga tushdi!")
